@@ -3,13 +3,13 @@ from config.config import config_blueprint
 from learndata.data import data_blueprint
 from api.api import api_blueprint
 
-
-
+from camphoto.camera_flask import photo_print
+from  sourcing  import ConfigData
 import numpy as np
 from PIL import Image
 import image_processing
 import os
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response,jsonify
 from datetime import datetime
 from functools import wraps, update_wrapper
 from shutil import copyfile
@@ -18,6 +18,7 @@ app = Flask(__name__)
 app.register_blueprint(config_blueprint)
 app.register_blueprint(data_blueprint)
 app.register_blueprint(api_blueprint)
+app.register_blueprint(photo_print)
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,10 +28,39 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 def home():
     return render_template("index.html")
 
+@app.route("/myavi")
+def avi_my():
+    confd = ConfigData("example.avi",2000)
+    res_ = confd.get_avi_video()
+
+    df = dict()
+    df["avi"] = res_
+    return jsonify(df)
+
+
+@app.route("/shots")
+def shots():
+    files = []
+
+    cwd = os.getcwd()
+    for l in  os.listdir(cwd+"/shots"):
+        files.append(l)
+
+
+    dct = dict()
+    dct["photo"] = files
+    return jsonify(files)
 
 
 
 
+@app.route("/cat")
+def catting():
+    return render_template("segmentation.html")
+
+@app.route("/segmentation")
+def catting2():
+    return render_template("cat.html")
 
 
 
